@@ -313,3 +313,10 @@ apply Service "bareos-recovery-dataseismo" {
 - Jobs with status `W` (completed with warnings) are counted as failures, not successes. Adjust the `[EfW]` pattern in the script if your policy differs.
 - The script auto-detects the bconsole output column layout from the header row and falls back to the standard Bareos column order if detection fails.
 - Colours are automatically suppressed in monitoring mode (`-M`).
+
+---
+
+## ⭐ Support the Project
+
+If you find this project useful, please consider giving it a star on GitHub.
+It helps others discover the project and motivates me to keep improving it. Thank you for your support!
