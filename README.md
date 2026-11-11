@@ -314,6 +314,10 @@ apply Service "bareos-recovery-dataseismo" {
 - The script auto-detects the bconsole output column layout from the header row and falls back to the standard Bareos column order if detection fails.
 - Colours are automatically suppressed in monitoring mode (`-M`).
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ---
 
 ## ⭐ Support the Project

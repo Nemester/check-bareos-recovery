@@ -30,6 +30,10 @@
 #: 
 #: Version 1.0
 #: 
+#: License
+#:   MIT (see LICENSE file)
+#:   SPDX-License-Identifier: MIT
+#: 
 # ==============================================================================
 
 set -euo pipefail
