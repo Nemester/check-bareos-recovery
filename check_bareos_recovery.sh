@@ -215,13 +215,15 @@ FAIL_COUNT=${#FAILED[@]}
 
 # ---------- build perfdata string ---------------------------------------------
 build_perfdata() {
-    # successful=<val>;<warn>;<crit>;0;
+    # successful=<val>;<warn>:;<crit>:;0;
     # failed=<val>;;;;
     # lookback_days=<val>;;;;
     # age_hours=<val>;;;; (hours since last successful backup, or U if none)
-    local warn_thresh="$MIN_COUNT"
-    local crit_thresh="${CRIT_COUNT:-0}"
-    [[ "$crit_thresh" -eq 0 ]] && crit_thresh=""
+    # minimum thresholds: OK range is "<min>:" (below it alerts), empty if disabled
+    local warn_thresh=""
+    local crit_thresh=""
+    [[ "$MIN_COUNT" -gt 0 ]] && warn_thresh="${MIN_COUNT}:"
+    [[ "${CRIT_COUNT:-0}" -gt 0 ]] && crit_thresh="${CRIT_COUNT}:"
 
     local age_hours="U"
     if [[ -n "$LAST_SUCCESS" ]]; then
@@ -233,7 +235,7 @@ build_perfdata() {
         age_hours=$(( (now_epoch - last_epoch) / 3600 ))
     fi
 
-    printf "successful=%d;%d;%s;0; failed=%d;;;; lookback_days=%d;;;; age_hours=%s;;;; last_files=%d;;;; last_bytes=%d;;;;" \
+    printf "successful=%d;%s;%s;0; failed=%d;;;; lookback_days=%d;;;; age_hours=%s;;;; last_files=%d;;;; last_bytes=%d;;;;" \
         "$COUNT" "$warn_thresh" "$crit_thresh" \
         "$FAIL_COUNT" \
         "$DAYS" \

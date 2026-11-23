@@ -71,7 +71,7 @@ When both `-M` and `-p` are given, a perfdata string is appended after `|` on th
 
 | Metric | Unit | Thresholds | Description |
 |--------|------|------------|-------------|
-| `successful` | count | warn=`-m`, crit=`-c` | Number of successful backups in the window |
+| `successful` | count | warn=`<-m>:`, crit=`<-c>:` (minimums) | Number of successful backups in the window |
 | `failed` | count | - | Number of failed/errored jobs in the window |
 | `lookback_days` | days | - | The `-d` value used for this check |
 | `age_hours` | hours | - | Hours since the last successful backup (`U` if none) |
@@ -139,7 +139,7 @@ INFO:  Querying job 'backup-myhost.example.com' for successful backups in the la
   [  6]  JobID: 32771     Started: 2026-06-14 23:02:05    Files: 11        Bytes: 4194304
   [  7]  JobID: 32712     Started: 2026-06-13 23:01:49    Files: 9         Bytes: 1048576
 
-  Perfdata: successful=7;5;;0; failed=0;;;; lookback_days=14;;;; age_hours=9;;;; last_files=33241;;;; last_bytes=874389473776;;;;
+  Perfdata: successful=7;5:;;0; failed=0;;;; lookback_days=14;;;; age_hours=9;;;; last_files=33241;;;; last_bytes=874389473776;;;;
 
 OK:    7 successful recovery point(s) for 'backup-myhost.example.com' in the last 14 day(s). Last: 2026-06-19 23:01:55. Failed: 0.
 ```
@@ -198,7 +198,7 @@ Exit code: `0`
 ```
 
 ```
-OK - 7 successful recovery point(s) for 'backup-myhost.example.com' in the last 7 day(s). Last: 2026-06-19 23:01:55. Failed: 0. | successful=7;5;2;0; failed=0;;;; lookback_days=7;;;; age_hours=9;;;; last_files=33241;;;; last_bytes=874389473776;;;;
+OK - 7 successful recovery point(s) for 'backup-myhost.example.com' in the last 7 day(s). Last: 2026-06-19 23:01:55. Failed: 0. | successful=7;5:;2:;0; failed=0;;;; lookback_days=7;;;; age_hours=9;;;; last_files=33241;;;; last_bytes=874389473776;;;;
 ```
 
 Exit code: `0`
@@ -212,7 +212,7 @@ Exit code: `0`
 ```
 
 ```
-WARNING - 3 successful recovery point(s) for 'backup-myhost.example.com' — below WARNING threshold of 5. Last: 2026-06-19 23:01:55. Failed: 1. | successful=3;5;2;0; failed=1;;;; lookback_days=3;;;; age_hours=9;;;; last_files=33241;;;; last_bytes=874389473776;;;;
+WARNING - 3 successful recovery point(s) for 'backup-myhost.example.com' — below WARNING threshold of 5. Last: 2026-06-19 23:01:55. Failed: 1. | successful=3;5:;2:;0; failed=1;;;; lookback_days=3;;;; age_hours=9;;;; last_files=33241;;;; last_bytes=874389473776;;;;
 ```
 
 Exit code: `1`
@@ -226,7 +226,7 @@ Exit code: `1`
 ```
 
 ```
-CRITICAL - No successful recovery points found for 'backup-myhost.example.com' in the last 1 day(s). Failed jobs: 0. | successful=0;1;;0; failed=0;;;; lookback_days=1;;;; age_hours=U;;;; last_files=0;;;; last_bytes=0;;;;
+CRITICAL - No successful recovery points found for 'backup-myhost.example.com' in the last 1 day(s). Failed jobs: 0. | successful=0;1:;;0; failed=0;;;; lookback_days=1;;;; age_hours=U;;;; last_files=0;;;; last_bytes=0;;;;
 ```
 
 Exit code: `2`
