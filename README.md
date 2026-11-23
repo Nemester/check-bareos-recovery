@@ -8,8 +8,9 @@ A Bash script that checks whether a [Bareos](https://www.bareos.com/) job has en
 
 - `bash` ≥ 4.0
 - `bconsole` installed and reachable (package `bareos-bconsole`)
-- The user running the script must have access to `bconsole` (typically `root` or a member of the `bareos` group)
-- `/etc/bareos/bconsole.conf` present, or the `BCONSOLE_CONF` variable set at the top of the script
+- The user running the script must have access to `bconsole` (typically `root` or a member of the `bareos` group),
+  or its own bconsole configuration file given with `-C` (see [Restricted console](#restricted-console-for-a-monitoring-user))
+- `/etc/bareos/bconsole.conf` present, or another configuration file given with `-C`
 
 ---
 
@@ -34,6 +35,7 @@ chmod +x check_bareos_recovery.sh
 | `-d` | `<days>` | `30` | How many days to look back for backups |
 | `-m` | `<count>` | `1` | Minimum successful backups required — sets the **WARNING** threshold |
 | `-c` | `<count>` | `0` (off) | **CRITICAL** threshold — raise CRITICAL if fewer than this many backups found |
+| `-C` | `<file>` | `/etc/bareos/bconsole.conf` | bconsole configuration file to use |
 | `-M` | | off | **Monitoring mode**: Icinga/Nagios-compatible single-line output and exit codes |
 | `-p` | | off | Append **perfdata** to the output line (only meaningful with `-M`) |
 | `-l` | | off | List all found recovery points with details (human mode only) |
@@ -62,6 +64,53 @@ Follows the Nagios plugin standard:
 | `1` | WARNING | Count < `-m` threshold |
 | `2` | CRITICAL | Count < `-c` threshold, or zero backups found |
 | `3` | UNKNOWN | bconsole unreachable, table parse error, or bad arguments |
+
+---
+
+## Restricted console for a monitoring user
+
+Instead of giving the monitoring user (e.g. `nagios`/`naemon`) read access to `/etc/bareos/bconsole.conf`,
+which holds the full-access director password, define a named console that may only list jobs:
+
+```
+# Director: /etc/bareos/bareos-dir.d/profile/monitoring-readonly.conf
+Profile {
+  Name = "monitoring-readonly"
+  Command ACL = list, llist
+  Job ACL = *all*
+  Client ACL = *all*
+  Catalog ACL = *all*
+  Pool ACL = *all*
+  Storage ACL = *all*
+  FileSet ACL = *all*
+  Schedule ACL = *all*
+}
+
+# Director: /etc/bareos/bareos-dir.d/console/monitoring.conf
+Console {
+  Name = monitoring
+  Password = "<secret>"
+  Profile = "monitoring-readonly"
+}
+```
+
+and a bconsole configuration file readable only by the monitoring user (mode `0600`):
+
+```
+Director {
+  Name = bareos-dir
+  Address = localhost
+  Password = "unused"   # ignored for a named console
+}
+Console {
+  Name = monitoring
+  Password = "<secret>"
+  Director = bareos-dir
+}
+```
+
+Reload the director (`echo reload | bconsole`) and run the check with
+`-C /path/to/that/file`. Commands other than `list`/`llist` are refused for this console.
 
 ---
 

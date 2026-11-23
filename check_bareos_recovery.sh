@@ -13,6 +13,8 @@
 #:   -d <days>       Look back this many days (default: 30)
 #:   -m <min_count>  Minimum required recovery points, sets WARNING threshold (default: 1)
 #:   -c <crit_count> Critical threshold: below this count → CRITICAL (default: 0, disabled)
+#:   -C <file>       bconsole configuration file (default: /etc/bareos/bconsole.conf),
+#:                   e.g. for a restricted named console of a non-root monitoring user
 #:   -M              Monitoring mode: Icinga/Nagios-compatible output and exit codes
 #:   -p              Include perfdata in output (only useful with -M)
 #:   -l              List all found recovery points with details (human mode only)
@@ -48,6 +50,7 @@ PERFDATA=false
 JOB_NAME=""
 BCONSOLE_CMD="bconsole"
 BCONSOLE_CONF="/etc/bareos/bconsole.conf"
+BCONSOLE_CONF_GIVEN=false
 
 # ---------- colours (suppressed in monitoring mode) ---------------------------
 RED='\033[0;31m'
@@ -92,12 +95,13 @@ ok()   { $MONITORING || echo -e "${GREEN}OK:${NC}    $*"; }
 warn() { $MONITORING || echo -e "${YELLOW}WARN:${NC}  $*"; }
 
 # ---------- parse args --------------------------------------------------------
-while getopts ":j:d:m:c:Mplh" opt; do
+while getopts ":j:d:m:c:C:Mplh" opt; do
     case $opt in
         j) JOB_NAME="$OPTARG" ;;
         d) DAYS="$OPTARG" ;;
         m) MIN_COUNT="$OPTARG" ;;
         c) CRIT_COUNT="$OPTARG" ;;
+        C) BCONSOLE_CONF="$OPTARG"; BCONSOLE_CONF_GIVEN=true ;;
         M) MONITORING=true ;;
         p) PERFDATA=true ;;
         l) LIST_JOBS=true ;;
@@ -118,7 +122,12 @@ if ! command -v "$BCONSOLE_CMD" &>/dev/null; then
 fi
 
 BCONSOLE_OPTS=()
-[[ -f "$BCONSOLE_CONF" ]] && BCONSOLE_OPTS+=("-c" "$BCONSOLE_CONF")
+if $BCONSOLE_CONF_GIVEN; then
+    [[ -r "$BCONSOLE_CONF" ]] || die "bconsole configuration file '${BCONSOLE_CONF}' not readable."
+    BCONSOLE_OPTS+=("-c" "$BCONSOLE_CONF")
+elif [[ -f "$BCONSOLE_CONF" ]]; then
+    BCONSOLE_OPTS+=("-c" "$BCONSOLE_CONF")
+fi
 
 if ! echo "quit" | "$BCONSOLE_CMD" "${BCONSOLE_OPTS[@]}" &>/dev/null; then
     die "Could not connect to Bareos Director via bconsole."
